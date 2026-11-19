@@ -550,7 +550,7 @@ export function splitFrontmatter(content: string): {
 	// 误加第二次 frontmatter：body 开头又是 ---
 	if (FM_FENCE_RE.test(body.split(/\r?\n/, 1)[0] ?? '')) {
 		console.warn(
-			'[Mindmap-Studio] 检测到重复 YAML frontmatter，仅第一个生效。',
+			'[Oh-My-Mindmap-Studio] 检测到重复 YAML frontmatter，仅第一个生效。',
 		);
 	}
 	return { frontmatter, body, gap };

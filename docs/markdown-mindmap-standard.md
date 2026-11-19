@@ -1,4 +1,4 @@
-# Markdown ↔ 思维导图映射标准（MindMap Studio）
+# Markdown ↔ 思维导图映射标准（Oh-My-Mindmap-Studio）
 
 > 关联实现：`src/markdown/md-outline.ts`（解析）/ `src/markdown/md-serialize.ts`（回写）/ `src/markdown/links-split.ts`（混排双链拆分，命令 + 自动触发）/ `src/features/navigation/view-wikilink.ts`（链接交互）/ `src/features/content/node-inline-content.ts`（节点内联内容对外 barrel；实现拆在 `node-inline-tokenize.ts`〔段序列、接管判定〕与 `node-inline-html.ts`〔DOM 装配、内联样式〕，2026-10-16）/ `src/domain/pipe-table.ts`（GFM 管道表识别，显示层，见 §3.5）/ `src/features/mindmap-codeblock.ts`（代码块只读嵌入，见 §2.4）/ `src/engine/mindmap.ts`（图标与内联内容钩子）/ `src/engine/mindmap-viewport.ts`（视口几何）；元数据契约 `src/domain/md-meta.ts`。
 > 回归测试：`tests/markdown/md-roundtrip.test.ts`（往返回归：解析结构、层级深度、不动点、编辑合成、rawOk 分支矩阵、uid、视图状态）、`tests/markdown/md-inline.test.ts`（行内 token 边界形态）、`tests/domain/pipe-table.test.ts`（管道表识别正反例）、`tests/domain/color-directive.test.ts`（节点配色指令：解析 / 保护区内不识别 / 就近覆盖 / 样式键清除）与 `tests/features/mindmap-codeblock.test.ts`（代码块嵌入：展示树折叠、降级边界、只读口径、`styles.css` 类名链）。

@@ -1860,7 +1860,7 @@ export class MindMapView
 			return;
 		}
 		console.warn(
-			'[mindmap-studio] 官方「自动更新内部链接」已关闭：本图对 %s 的引用保持不变（%s）',
+			'[Oh-My-Mindmap-Studio] 官方「自动更新内部链接」已关闭：本图对 %s 的引用保持不变（%s）',
 			file.path,
 			action,
 		);

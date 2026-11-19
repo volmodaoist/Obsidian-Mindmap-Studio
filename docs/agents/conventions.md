@@ -546,7 +546,8 @@
 
 - [K37] **项目命名保持一致**
   - 要点
-    - 当前插件、设置与设置页使用 MindMap Studio 的统一命名。
+    - 当前显示品牌为 Oh-My-Mindmap-Studio，维护作者为 volmodaoist；设置页与悬停来源使用 manifest.name。
+    - 插件 ID、安装目录及持久化键仍用 mindmap-studio；包名为 oh-my-mindmap-studio，上游出处和原版权保留。
     - 历史品牌名只作记录；更名应作为单独任务处理。
 
 - [K50] **模块化的四条边界**

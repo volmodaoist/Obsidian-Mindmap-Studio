@@ -382,7 +382,7 @@ async function runFlush(): Promise<void> {
 	} catch (e) {
 		// flush 失败：保持字面显示，由重试预算兜底，不打断渲染链。
 		// 留痕一次便于定位无痕退化（K85 / K113 同族治理：静默会让失效无迹可寻）
-		console.debug('MindMap Studio：MathJax flush 失败', e);
+		console.debug('Oh-My-Mindmap-Studio：MathJax flush 失败', e);
 	}
 	flushGeneration += 1;
 	schedulePumpForPending();

@@ -721,3 +721,11 @@
 - 完整 npm run check:gates 通过：类型/构建、133 文件/3375 项测试、lint、knip、真实 Chrome 和 release metadata；文件规模仍 46 条豁免、未登记超限 0。安装脚本不影响运行时 bundle，main.js 仍为 1,515,239 字节。
 - 已通过真实 make install 将 MindMap Studio 安装到云笔记，并安装 CodeTab 配套取消修复。两款插件六项文件与最终构建 SHA256 一致，data.json 与 community-plugins.json 保留；未修改笔记。旧文件和安装记录备份在系统临时目录，汇总 `/tmp/mindmap-codetab-cloud-install.json` 包含两处备份路径及核对结果。
 - 未自动重启日常 Obsidian、未提交或推送；用户重启宿主后验收当前导图/OpenAPI 功能。
+
+> **2026-11-19 Fork 品牌与作者更新（K37）**
+
+- 在 ff485e8 基线上建立独立 feat/oh-my-mindmap-studio，显示名改为 Oh-My-Mindmap-Studio，维护作者 volmodaoist、作者 URL 为其 GitHub；包名与 lock 根名称同步为 oh-my-mindmap-studio，仓库元数据使用实际 Fork 地址。
+- 设置页与悬停来源读取 manifest.name；诊断前缀、安装帮助、中英 README 和标准文档标题使用新品牌。README 保留 WinterMosquito 上游出处，MIT 原版权原样保留并追加 Fork 修改版权；旧版本/测量记录不追溯改名。插件 ID、安装目录、命令和存储键沿用当前值，K37 与决策同步；未修改 AGENTS.md。
+- 全部 check:gates 通过：类型/构建、133 文件/3375 项测试、lint、CSS lint、knip、真实 Chrome 与发布元数据。仅更新已有消息断言，没有增加机械品牌字符串测试；未新增源码文件，46 条豁免与行数保持一致。
+- 已通过 make install 更新云笔记的 mindmap-studio 三件套；名称、作者、三个 SHA256 与当前构建逐项一致，旧设置保留。备份和证据 `/tmp/oh-my-mindmap-studio-brand-install.json`；未自动重启 Obsidian，用户重启后查看新名称。
+- 未提交、推送或修改远程仓库名称；版本仍为 0.3.3。

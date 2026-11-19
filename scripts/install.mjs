@@ -52,7 +52,7 @@ export function copyBuiltPlugin(root, vaultPath) {
 		const path = join(destination, name);
 		if (existsSync(path)) previous.set(name, readFileSync(path));
 	}
-	const backup = mkdtempSync(join(tmpdir(), 'mindmap-studio-install-'));
+	const backup = mkdtempSync(join(tmpdir(), 'oh-my-mindmap-studio-install-'));
 	for (const [name, bytes] of previous) writeFileSync(join(backup, name), bytes);
 	// 备份在任何覆盖之前完成；复制失败保留备份路径供恢复。
 	console.log(`Backup: ${backup}`);
@@ -83,7 +83,7 @@ function npm(args) {
 
 export function main() {
 	if (process.argv.includes('--help')) {
-		console.log('make install vault="/path/to/Obsidian vault"\n\nBuilds MindMap Studio, backs up the installed files, and copies main.js, manifest.json and styles.css.\nExisting notes, plugin settings and enabled-plugin configuration are preserved.\nRestart Obsidian afterward to load the new main.js.\n\nOther targets: make build, make test, make lint, make check.');
+		console.log('make install vault="/path/to/Obsidian vault"\n\nBuilds Oh-My-Mindmap-Studio, backs up the installed files, and copies main.js, manifest.json and styles.css.\nExisting notes, plugin settings and enabled-plugin configuration are preserved.\nRestart Obsidian afterward to load the new main.js.\n\nOther targets: make build, make test, make lint, make check.');
 		return;
 	}
 	const vault = validateVault(process.env.MINDMAP_STUDIO_VAULT ?? process.argv[2]);

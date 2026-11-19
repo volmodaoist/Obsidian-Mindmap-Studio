@@ -2,17 +2,17 @@
 
 <div align="center">
 
-# 🧠 MindMap Studio
+# 🧠 Oh-My-Mindmap-Studio
 
 **把笔记当作思维导图来读、来改 —— 而笔记仍然是 Markdown。**
 
 在笔记的 frontmatter 写 `Mindmap: Mindmap`（布局另写 `Mindmap Layout`），它打开时即是导图；任何笔记也可用右键菜单的**「以思维导图打开」**打开。不转换格式、不复制副本：大纲*就是*文件本身，每一处编辑都写回其中。
 
-基于 [simple-mind-map](https://github.com/wanglin2/mind-map) 引擎 · 由 [WinterMosquito](https://github.com/WinterMosquito) 开发
+由 [volmodaoist](https://github.com/volmodaoist) 维护 · Fork 自 [WinterMosquito](https://github.com/WinterMosquito) 的 [MindMap Studio](https://github.com/WinterMosquito/Obsidian-Mindmap-Studio) · 基于 [simple-mind-map](https://github.com/wanglin2/mind-map) 引擎
 
 <p align="center">
-  <a href="https://github.com/WinterMosquito/Obsidian-Mindmap-Studio/releases"><img src="https://img.shields.io/github/v/release/WinterMosquito/Obsidian-Mindmap-Studio?label=Release&color=blue" alt="Latest release" /></a>
-  <a href="https://github.com/WinterMosquito/Obsidian-Mindmap-Studio/blob/main/LICENSE"><img src="https://img.shields.io/github/license/WinterMosquito/Obsidian-Mindmap-Studio?label=License&color=green" alt="License" /></a>
+  <a href="https://github.com/volmodaoist/Obsidian-Mindmap-Studio/releases"><img src="https://img.shields.io/github/v/release/volmodaoist/Obsidian-Mindmap-Studio?label=Release&color=blue" alt="Latest release" /></a>
+  <a href="https://github.com/volmodaoist/Obsidian-Mindmap-Studio/blob/main/LICENSE"><img src="https://img.shields.io/github/license/volmodaoist/Obsidian-Mindmap-Studio?label=License&color=green" alt="License" /></a>
   <a href="https://obsidian.md"><img src="https://img.shields.io/badge/Obsidian-1.13.0%2B-purple" alt="Obsidian version" /></a>
   <a href="https://obsidian.md"><img src="https://img.shields.io/badge/Platform-%E6%A1%8C%E9%9D%A2-blue" alt="Platform" /></a>
 </p>
@@ -23,7 +23,7 @@
 
 ## ✨ 它是什么 —— 以及它不是什么
 
-MindMap Studio 是一个**渲染层**，而非格式转换器。它读取笔记的 Markdown 大纲、画成思维导图，再把你的编辑写回为 Markdown —— 笔记因此保持 100% 标准 Markdown，链接、反向链接、全文搜索与 Git 都照常生效。
+Oh-My-Mindmap-Studio 是一个**渲染层**，而非格式转换器。它读取笔记的 Markdown 大纲、画成思维导图，再把你的编辑写回为 Markdown —— 笔记因此保持 100% 标准 Markdown，链接、反向链接、全文搜索与 Git 都照常生效。
 
 | 它是 | 它不是 |
 |---|---|
@@ -256,7 +256,7 @@ Mindmap Layout: logical     ← 布局（六种 kebab 值；缺省回落设置�
 
 ## ⚙️ 设置
 
-全部在 **设置 → MindMap Studio**（配置仅存本地插件 `data.json`；下表**按面板顺序**）：
+全部在 **设置 → Oh-My-Mindmap-Studio**（配置仅存本地插件 `data.json`；下表**按面板顺序**）：
 
 | 设置项 | 默认 | 说明 |
 |---|---|---|
@@ -281,12 +281,12 @@ Mindmap Layout: logical     ← 布局（六种 kebab 值；缺省回落设置�
 
 ## 📦 安装
 
-- **社区插件**：**设置 → 第三方插件** → 搜索 *MindMap Studio*。
-- **从 GitHub Release 安装**：从仓库 [Releases](https://github.com/WinterMosquito/Obsidian-Mindmap-Studio/releases) 页面下载最新版本的附件（`main.js`、`manifest.json`、`styles.css`），复制到 `<仓库>/.obsidian/plugins/mindmap-studio/`，重启 Obsidian 后在 **设置 → 第三方插件** 启用。（每个 Release 同时附带 `LICENSE` 与 `THIRD-PARTY-NOTICES.md` 以履行许可声明——无需复制进插件目录。）
+- **安装本 Fork**：使用本仓库的 Release 或源码构建方式；社区目录中的 *MindMap Studio* 对应上游项目。
+- **从 GitHub Release 安装**：从仓库 [Releases](https://github.com/volmodaoist/Obsidian-Mindmap-Studio/releases) 页面下载最新版本的附件（`main.js`、`manifest.json`、`styles.css`），复制到 `<仓库>/.obsidian/plugins/mindmap-studio/`，重启 Obsidian 后在 **设置 → 第三方插件** 启用。（每个 Release 同时附带 `LICENSE` 与 `THIRD-PARTY-NOTICES.md` 以履行许可声明——无需复制进插件目录。）
 - **从源码构建**：`npm install && npm run build` 生成 `main.js`，与 `manifest.json`、`styles.css` 一起放入插件目录。
 - **快速本地安装**：`make install vault="/你的仓库路径"` 自动构建、备份现有插件文件并安装三件套；输出备份路径，逐项核对 SHA256，保留笔记和插件设置。安装后重启 Obsidian 加载新代码。
 
-> 每个版本的变更说明见仓库 [Releases](https://github.com/WinterMosquito/Obsidian-Mindmap-Studio/releases) 页面（正文取自 [`docs/release-notes-<版本>.md`](docs/)）。
+> 每个版本的变更说明见仓库 [Releases](https://github.com/volmodaoist/Obsidian-Mindmap-Studio/releases) 页面（正文取自 [`docs/release-notes-<版本>.md`](docs/)）。
 
 > 需要 Obsidian 1.13.0 或更高版本，仅支持桌面端（Windows / macOS / Linux）。配置仅存本地（插件 `data.json`），无遥测、不发起外发网络请求。`main.js` 由 CI 构建并随每个 GitHub Release 发布（不提交进仓库）。
 

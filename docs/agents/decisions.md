@@ -7,6 +7,7 @@
 
 | 场景 | 选择 | 说明 |
 |---|---|---|
+| Fork 品牌与作者（K37） | `manifest.json` / `package.json` / `main.registerHoverLinkSource` | 显示品牌 Oh-My-Mindmap-Studio，维护作者 volmodaoist、作者 URL 指向其 GitHub；包名 oh-my-mindmap-studio 与 lock 根名称同步。设置及悬停来源由 manifest.name 呈现。插件 ID/安装目录/命令及持久化键沿用 mindmap-studio，不另起配置存储；README 的发布链接使用实际 Fork 仓库，保留 WinterMosquito 上游出处和原 MIT 版权，追加 Fork 修改版权。历史版本说明、提交和测量记录不追溯更名。 |
 | 创建入口与命名弹窗（K217） | `commands.registerCommands` / `main.onload` + `ui/modal-name.ts` / `ui/modal-name.css` | 新建保留命令面板与文件夹右键，删除丝带注册与相应语言刷新分支，命令 ID 不变。使用官方 `Modal.modalEl` 加专属类，将 `--modal-radius` 局部设为宿主 `--radius-m`；名称输入只设宽度，圆角、字体、边框、聚焦反馈和按钮由宿主提供。提示和动作间距使用宿主变量；空名禁用、Enter 提交、Esc/遮罩取消及创建落点保持既有流程。 |
 | 纯逻辑（无 obsidian / 引擎依赖） | `domain/` | lint 强制零依赖 |
 | 通用机制（常量/文案/错误/并发/事件/持久化） | `core/` | 各一份，不分模块重复 |
@@ -90,4 +91,4 @@
 
 ## 当前数据契约（K213）
 
-历史兼容已移除：启动不扫描迁移旧属性，文件与嵌入只读当前布局名称，配色只收当前 id/自定义 hex，数值设置只收有限数字。ViewStateStore.hydrate 仅投影当前字段，不返回迁移标志也不排写盘。纯图片节点不把文件名当作文本，显式文件名文本正常保存。保留当前 Markdown 往返、保存/冲突/撤销、引擎 id 转换和实际宿主能力适配；品牌标识与存储格式尚未变更。
+历史兼容已移除：启动不扫描迁移旧属性，文件与嵌入只读当前布局名称，配色只收当前 id/自定义 hex，数值设置只收有限数字。ViewStateStore.hydrate 仅投影当前字段，不返回迁移标志也不排写盘。纯图片节点不把文件名当作文本，显式文件名文本正常保存。保留当前 Markdown 往返、保存/冲突/撤销、引擎 id 转换和实际宿主能力适配；显示品牌已独立，插件标识和存储格式沿用当前契约（见 K37）。

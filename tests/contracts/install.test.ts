@@ -12,7 +12,7 @@ function fixture() {
 	const root = join(base, 'plugin'); const vault = join(base, '云笔记 with spaces');
 	mkdirSync(root); mkdirSync(join(vault, DEFAULT_CONFIG_DIR), { recursive: true });
 	writeFileSync(join(root, 'main.js'), 'new plugin'); writeFileSync(join(root, 'styles.css'), 'new style');
-	writeFileSync(join(root, 'manifest.json'), JSON.stringify({ id: 'mindmap-studio', name: 'MindMap Studio', version: '0.3.3' }));
+	writeFileSync(join(root, 'manifest.json'), JSON.stringify({ id: 'mindmap-studio', name: 'Oh-My-Mindmap-Studio', version: '0.3.3' }));
 	return { root, vault, base, destination: join(vault, DEFAULT_CONFIG_DIR, 'plugins/mindmap-studio') };
 }
 afterEach(() => { cleanup.splice(0).forEach(path => rmSync(path, { recursive: true, force: true })); vi.restoreAllMocks(); });
@@ -81,6 +81,6 @@ describe('local plugin installer', () => {
 	it('prints help without running a build or touching a vault', () => {
 		const result = spawnSync(process.execPath, [fileURLToPath(new URL('../../scripts/install.mjs', import.meta.url)), '--help'], { encoding: 'utf8' });
 		expect(result.status).toBe(0); expect(result.stdout).toContain('make install vault=');
-		expect(result.stdout).not.toContain('> mindmap-studio');
+		expect(result.stdout).not.toContain('> oh-my-mindmap-studio');
 	});
 });

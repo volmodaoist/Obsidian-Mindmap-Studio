@@ -546,7 +546,7 @@ describe('sanitizeSettings：非法值诊断报告', () => {
 		reportDroppedSettings(['defaultLayout']);
 		expect(warnSpy).toHaveBeenCalledTimes(1);
 		const message = String(warnSpy.mock.calls[0]?.[0]);
-		expect(message).toContain('MindMap Studio：');
+			expect(message).toContain('Oh-My-Mindmap-Studio：');
 		expect(message).toContain('language、exportScale');
 
 		warnSpy.mockRestore();

@@ -1,5 +1,5 @@
 /**
- * MindMap Studio —— Obsidian 思维导图插件入口。
+ * Oh-My-Mindmap-Studio —— Obsidian 思维导图插件入口。
  *
  * 本类只做装配与生命周期编排（遵循 obsidian-sample-plugin 规范）：
  * - onload: 设置载入、注册视图/扩展名/事件监听/设置面板；
@@ -187,7 +187,7 @@ export default class MindMapStudioPlugin extends Plugin {
 		// 悬停预览源：导图节点上的 [[wikilink]] 触发 Obsidian 原生页面预览
 		// （core 只处理已注册 hoverLinkSource 的事件，未注册会静默忽略）
 		this.registerHoverLinkSource(VIEW_TYPE, {
-			display: 'MindMap Studio',
+			display: this.manifest.name,
 			defaultMod: false,
 		});
 

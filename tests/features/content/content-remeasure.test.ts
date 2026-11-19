@@ -221,7 +221,7 @@ describe('ContentRemeasureSession（自绘内容定稿 → 尺寸同步会话）
 		// node_tree_render_end → 重试：root 已回填但仍解析不到（真异常）→ 告警一次
 		session.retryDeferred();
 		expect(warnSpy).toHaveBeenCalledTimes(1);
-		expect(String(warnSpy.mock.calls[0]?.[0])).toContain('MindMap Studio：');
+			expect(String(warnSpy.mock.calls[0]?.[0])).toContain('Oh-My-Mindmap-Studio：');
 		expect(String(warnSpy.mock.calls[0]?.[0])).toContain('未能定位归属节点');
 		expect(engine.refreshNodesCustomContent).not.toHaveBeenCalled();
 
