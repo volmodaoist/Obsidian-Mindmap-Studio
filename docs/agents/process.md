@@ -39,6 +39,15 @@
 > 本表是「结论该落到哪个文件」的映射；硬规则 6（源文件变更同步索引）与硬规则 10（文件规模只允许收敛）
 > 是**结论本身**，两者不是重复。冲突时以 `AGENTS.md` 为准。
 
+## 本地安装与验收
+
+- `make install vault="/path/to/vault"`：经 `scripts/install.mjs` 校验已有 `.obsidian`，按需安装依赖，生产构建后将三件套安装到 manifest.id 对应的插件目录。
+  - Makefile 用原始环境变量传递路径，支持空格和中文；Node 子进程不拼接用户路径为 shell 命令。
+  - 覆盖前将旧三件套及已有 data.json 备份到系统临时目录，打印备份路径并写 install.json；复制后逐项核对 SHA256。只覆盖三件套，不更改笔记、设置或 community-plugins.json。
+  - 命令不自动重启宿主；安装后重启 Obsidian，首次安装时在第三方插件设置启用。简单停用/启用不能保证重新加载 main.js。
+- `make build/test/lint/check` 分别调用既有 npm 命令；`make check` 使用同一 check:gates 门禁，不另维护检查清单。
+- `tests/contracts/install.test.ts` 在临时目录验证路径/产物拒绝、首次安装、备份、设置与笔记保留、Make 原始路径传递及帮助入口；不在用户 vault 中运行这些用例。
+
 ## 数据格式变更
 
 本 Fork 只实现当前数据契约，不提供历史格式迁移或别名映射（K213）。

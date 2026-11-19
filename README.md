@@ -284,6 +284,7 @@ Everything lives in **Settings → MindMap Studio** (stored locally in the plugi
 - **Community plugins**: **Settings → Community plugins** → search *MindMap Studio*.
 - **From GitHub releases**: download the latest release assets (`main.js`, `manifest.json`, `styles.css`) from the repo [Releases](https://github.com/WinterMosquito/Obsidian-Mindmap-Studio/releases) page, copy them into `<vault>/.obsidian/plugins/mindmap-studio/`, reload Obsidian, then enable the plugin in **Settings → Community plugins**. (Each release also attaches `LICENSE` and `THIRD-PARTY-NOTICES.md` for licence compliance — no need to copy those into the plugin folder.)
 - **Build from source**: `npm install && npm run build` produces `main.js`; copy it together with `manifest.json` and `styles.css` into the plugin folder.
+- **Quick local install**: `make install vault="/path/to/vault"` builds, backs up the existing plugin files, and installs the three assets. The command prints the backup path and verifies SHA256; notes and plugin settings are preserved. Restart Obsidian afterward to load the new code.
 
 > Release notes for each version live on the repo's [Releases](https://github.com/WinterMosquito/Obsidian-Mindmap-Studio/releases) page (their text comes from [`docs/release-notes-<version>.md`](docs/)).
 

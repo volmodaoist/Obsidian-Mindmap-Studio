@@ -291,6 +291,7 @@ Obsidian DOM 助手，而这道门禁在 CI 里是 `continue-on-error` —— �
 ## 插件内容渲染桥（K219）
 
 - 纯逻辑：`tests/markdown/md-codeblocks.test.ts` 覆盖围栏顺序、嵌套、引用、CRLF、删除与陈旧源码拒绝；`tests/core/plugin-content-types.test.ts` 覆盖跨窗口事件能力判定。
+- OpenAPI：`tests/platform/rendering/plugins/code-tab.test.ts` 直测 Document 发现、参数透传、迟到句柄释放、最新值合并、Busy 状态重试与通知竞态、串行更新、预览失败和卸载后静默。
 - 内容装配：节点内容测试覆盖超长已登记围栏的完整源码；共享会话测试覆盖陈旧视图不能提交。
 - `scripts/visual-plugin-content.mjs` 进入 `verify:visual`，用真实 Chrome 的替身处理器验证惰性启动、活动 DOM/按钮复用、异步 SVG、尺寸、导出及删除/关闭清理；桥与接口变更触发门禁。
 - `scripts/verify-plugin-obsidian.mjs` 使用实际 TikZJax 与配套 CodeTab，在独立临时 Obsidian 库验证零写盘打开、标签切换增高、编辑焦点、正文保存、共享撤销、增改标签、SVG 冻结与只读嵌入。运行参数、版本依赖和边界见 [渲染桥说明](../plugin-content-rendering.md)。

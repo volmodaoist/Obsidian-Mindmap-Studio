@@ -17,7 +17,7 @@ const host = await launchObsidianHost(initial, [
 ]);
 const { page, vault, directory } = host;
 const results = []; const errors = []; const diagnostics = [];
-page.on('pageerror', error => errors.push(error.message));
+page.on('pageerror', error => errors.push(error.stack ?? error.message));
 page.on('console', message => {
 	if (message.type() === 'error') errors.push(message.text());
 	else if (['warning', 'warn'].includes(message.type())) diagnostics.push(message.text());
@@ -33,6 +33,26 @@ try {
 		console.log('NATIVE BASELINE TIKZ OK');
 	}
 	await page.evaluate(async () => {
+		for (const existing of app.workspace.getLeavesOfType('mindmap-view')) existing.detach();
+		window.testCodeTabMounts = [];
+		const wrappers = new WeakMap();
+		const wrap = api => {
+			if (!api || wrappers.has(api)) return wrappers.get(api) ?? api;
+			const wrapped = { ...api, render: async options => {
+				const handle = await api.render(options);
+				const record = { handle: null, container: options.container, path: options.sourcePath };
+				const wrappedHandle = { ...handle, update: async patch => {
+					await handle.update(patch); record.path = patch.sourcePath ?? record.path;
+				} };
+				record.handle = wrappedHandle; window.testCodeTabMounts.push(record);
+				return wrappedHandle;
+			} };
+			wrappers.set(api, wrapped); wrappers.set(wrapped, wrapped); return wrapped;
+		};
+		document.addEventListener('obsidian-code-tab-api', event => {
+			let api = wrap(event.detail.api);
+			Object.defineProperty(event.detail, 'api', { configurable: true, get: () => api, set: value => { api = wrap(value); } });
+		});
 		const file = app.vault.getFileByPath('Test.mindmap.md'); const leaf = app.workspace.getLeaf(true);
 		await leaf.openFile(file); await leaf.setViewState({ type: 'mindmap-view', state: { file: file.path } });
 		window.testMindMapView = leaf.view;
@@ -47,6 +67,11 @@ try {
 	await page.evaluate(() => window.testMindMapView.mindMap.view.fit());
 	assert.equal(await fileContent(), initial); results.push('Opening plugins does not rewrite Markdown');
 	const group = page.locator('.mindmap-canvas-container .mindmap-plugin-live.code-tab').first();
+	await page.evaluate(() => {
+		window.testCodeTabRoot = document.querySelector('.mindmap-canvas-container .mindmap-plugin-live.code-tab');
+		window.testCodeTabHost = window.testCodeTabMounts.find(item => item.container === window.testCodeTabRoot);
+		if (!window.testCodeTabHost) throw new Error('Node was not mounted through the public API');
+	});
 	await group.getByRole('tab', { name: 'Tall', exact: true }).click();
 	await page.waitForFunction(() => {
 		const group = document.querySelector('.mindmap-plugin-live.code-tab');
@@ -69,7 +94,10 @@ try {
 	results.push('CodeTab edits save through the document session with TikZ source unchanged');
 	await page.evaluate(async () => { window.testMindMapView.undo(); await window.testMindMapView.session.flush(); });
 	await page.waitForFunction(async original => (await app.vault.read(app.vault.getFileByPath('Test.mindmap.md'))) === original, initial);
+	await page.waitForFunction(source => window.testCodeTabHost.handle.getSnapshot().source === source, tab);
+	assert(await page.evaluate(() => document.querySelector('.mindmap-canvas-container .mindmap-plugin-live.code-tab') === window.testCodeTabRoot));
 	results.push('Shared undo restores the original Markdown');
+	results.push('Editing and shared undo update the same public handle and live DOM');
 	await page.waitForFunction(() => document.querySelector('.mindmap-canvas-container .mindmap-plugin-live.code-tab'));
 	await page.waitForTimeout(300);
 	await group.getByTestId('code-tab-add').click();
@@ -126,6 +154,28 @@ try {
 	assert.equal(await readOnly.getByTestId('code-tab-rename').count(), 0);
 	assert.equal(await fileContent(), initial);
 	results.push('Read-only embeds allow tab switching without editing controls or writes');
+	await page.evaluate(async () => {
+		app.workspace.setActiveLeaf(window.testMindMapView.leaf, { focus: true });
+		await app.plugins.disablePlugin('obsidian-code-tab'); app.workspace.trigger('layout-change');
+	});
+	await page.waitForFunction(() => !document.querySelector('.mindmap-canvas-container .mindmap-plugin-live.code-tab'));
+	assert(await page.evaluate(() => {
+		try { window.testCodeTabHost.handle.getSnapshot(); return false; } catch (error) { return error.code === 'DISPOSED'; }
+	}));
+	await page.evaluate(async () => { await app.plugins.enablePlugin('obsidian-code-tab'); app.workspace.trigger('layout-change'); });
+	await group.waitFor();
+	assert(await page.evaluate(() => document.querySelector('.mindmap-canvas-container .mindmap-plugin-live.code-tab') !== window.testCodeTabRoot));
+	results.push('Provider disable disposes old handles; enable and layout refresh remount the nodes');
+	await page.evaluate(async () => {
+		await app.fileManager.renameFile(app.vault.getFileByPath('Test.mindmap.md'), 'Moved.mindmap.md');
+		app.workspace.trigger('layout-change');
+	});
+	await page.waitForFunction(() => {
+		const mounted = window.testCodeTabMounts.filter(item => item.container.closest('.mindmap-canvas-container') && item.container.classList.contains('code-tab'));
+		return mounted.length > 0 && mounted.every(item => item.path === 'Moved.mindmap.md');
+	});
+	assert(await page.evaluate(() => window.testMindMapView.file.path === 'Moved.mindmap.md'));
+	results.push('Native rename keeps the diagram open and refreshes the plugin path context');
 	assert.deepEqual(errors, [], 'No runtime errors in the actual Obsidian host');
 	await writeFile(join(directory, 'report.json'), JSON.stringify({ ok: true, results, errors, diagnostics }, null, 2));
 	console.log('PASS:',results.length,'checks; artifacts:',directory);

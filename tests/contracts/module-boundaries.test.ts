@@ -41,7 +41,7 @@ const SRC = path.join(ROOT, 'src');
  * 空串在首位：`../../vendor/simple-mind-map.cjs` 这类带扩展名的目标必须原样命中；
  * 目录由 `isRegularFile` 排除，故空串不会把 `../engine` 误判成文件。
  */
-const RESOLVE_SUFFIXES = ['', '.ts', '.cts', '.mts', '.d.cts', '.json'];
+const RESOLVE_SUFFIXES = ['', '.ts', '.cts', '.mts', '.d.ts', '.d.cts', '.json'];
 
 /** 诊断信息一律用相对 ROOT 的 posix 路径（跨平台可读、与仓库书写一致） */
 function relPath(absPath: string): string {

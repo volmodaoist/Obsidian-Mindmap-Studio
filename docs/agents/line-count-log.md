@@ -703,3 +703,21 @@
 - 实际第三方验证：Obsidian 1.15.1 + TikZJax 0.5.2 + 配套 CodeTab 2.2.1，在独立临时 vault 通过 8 项，覆盖零写盘打开、切页增高、编辑增高焦点、正文保存、共享撤销、新增/改名标签、SVG 冻结和只读嵌入。报告 /var/folders/zf/srfxv0kd7vn459nd5bs72j0c0000gn/T/mindmap-plugin-e2e-O6jIpN/report.json，无运行时错误；导出触发既有空 MathJax 字体诊断。最终三件套与测试副本逐项 SHA256 一致。
 - 安装：已备份并覆盖云笔记 vault 中 MindMap Studio 与 CodeTab 的 main.js/manifest.json/styles.css，六项 SHA256 核对通过；记录 /tmp/mindmap-plugin-install.json。日常 vault 的实际主题与操作体验留待用户重启 Obsidian 后验收；笔记和插件设置未改写。
 - Git：两个仓库均保留未提交工作区改动，未提交、推送或创建远程 PR。
+
+> **2026-11-19 CodeTab OpenAPI 迁移（K219）**
+
+- 分支：从 ebf4802 创建 feat/codetab-openapi；上一批直接创建/工具栏改动保存在具名 stash `wip/direct-create-before-codetab-openapi`（398e529d6b21904947d2e253c18f2baa45e383e1），没有混入本批。
+- 实现：移除旧渲染请求，采用 Document API 发现、活动句柄和发布类型声明；源码/路径串行原地更新，Busy 保留最新值并处理通知先于拒绝的竞态。内部 DOM 通知不回灌旧树；节点删除和引擎关闭释放句柄与订阅，取消未提交草稿，保留已接受事务。插件后续布局/渲染重新发现提供者；导出仍冻结活动 DOM。
+- 规模：src 共 194 个 TypeScript 文件；code-tab 97 行、声明 188 行、owner 221 行；新增文件均不超过 300 行，46 条豁免、未登记超限 0。main.js 为 1,515,239 字节；未添加运行时依赖。
+- 门禁：npm run check:gates 全部通过，构建/类型、132 文件/3368 项测试（新增 12 项 API 同步直测）、lint、knip、真实 Chrome（插件桥 13 项、720 组节点内容对照及原有布局/拖动/导出）。依赖图检查器补齐标准 .d.ts 解析；索引、K219、决策、渲染接口和测试说明同步。
+- 联测：真实 Obsidian + CodeTab + TikZJax 在独立临时库通过 11 项，覆盖纯浏览不写盘、切页/编辑尺寸与焦点、保存及共享撤销、同句柄复用、标签增改、SVG、只读、插件停启与原生改名路径同步；运行时错误 0。报告 `/var/folders/zf/srfxv0kd7vn459nd5bs72j0c0000gn/T/mindmap-plugin-e2e-L4RCxP/report.json`，六项产物 SHA256 与最终构建一致。既有空 MathJax 字体诊断及主动停用 CodeTab 的源码回退告警保留。
+- 配套修复：联测发现 CodeTab 原生 Markdown 预览取消时未捕获 Disposed；在它的独立 fix/native-markdown-render-cancel 分支修复，仅修改 render.ts 和宿主说明。公开 render 继续拒绝取消，原生 Markdown 正常收尾；CodeTab 81 项核心测试、类型/构建及 lint 通过。
+- 交付：两仓库均未提交/推送；未覆盖日常云笔记。完整弹出窗口、用户主题与鼠标操作手感仍需实机验收；提供者在启用前既有窗口缺少发现监听的限制已说明。
+
+> **2026-11-19 本地安装 Makefile 与云笔记验收包**
+
+- 参考 immersive-folder 的 Makefile/Node 安装方式，新增根 Makefile（23 行）和 scripts/install.mjs（101 行）。`make install vault="/path/to/vault"` 先校验标准配置目录、按需装依赖和构建，再备份旧三件套/data.json、复制三件套并核对 SHA256；原始路径通过环境变量传递，不拼为 shell 代码。其它 make 目标只调用既有 npm 命令，不自动重启宿主。
+- 新增 tests/contracts/install.test.ts（86 行），7 项临时目录用例覆盖缺失路径/产物拒绝、首次安装、备份、设置/启用配置/笔记保留、含中文/空格/命令替换字符的 Make 参数与帮助入口。中英 README、分层索引及 process 安装说明同步；未修改 AGENTS.md。
+- 完整 npm run check:gates 通过：类型/构建、133 文件/3375 项测试、lint、knip、真实 Chrome 和 release metadata；文件规模仍 46 条豁免、未登记超限 0。安装脚本不影响运行时 bundle，main.js 仍为 1,515,239 字节。
+- 已通过真实 make install 将 MindMap Studio 安装到云笔记，并安装 CodeTab 配套取消修复。两款插件六项文件与最终构建 SHA256 一致，data.json 与 community-plugins.json 保留；未修改笔记。旧文件和安装记录备份在系统临时目录，汇总 `/tmp/mindmap-codetab-cloud-install.json` 包含两处备份路径及核对结果。
+- 未自动重启日常 Obsidian、未提交或推送；用户重启宿主后验收当前导图/OpenAPI 功能。

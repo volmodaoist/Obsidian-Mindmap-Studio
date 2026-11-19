@@ -10,7 +10,9 @@
 - `src/core/plugin-content-types.ts`：槽位、渲染请求与活动组件事件判定。
 - `src/ui/node-content/content-plugin.ts`：预测量只登记槽位并放冻结副本，保留代码回退。
 - `src/platform/rendering/plugins/`
-  - `native.ts`：官方 `MarkdownRenderer.render()` 与可选宿主协议；声明静态/活动模式和完成事件。
+  - `native.ts`：官方 `MarkdownRenderer.render()` 与 CodeTab OpenAPI 分流；声明静态/活动模式和完成事件。
+  - `code-tab.ts`：API 发现、活动句柄、串行更新、Busy 最新值重试和订阅清理。
+  - `code-tab-api.d.ts`：复制 CodeTab 构建产物 `dist/code-tab-api.d.ts`，仅类型导入；不复制其运行时和补全 Core。
   - `owner.ts`：真实 foreignObject 槽位出现后才创建组件。重排迁移同一活动 DOM，保留按钮事件与编辑器焦点。
   - `bridge.ts`：唯一登记与导出入口；节点删除、引擎销毁时释放组件、观察器及产物登记。
   - `snapshot.ts`、`fonts.ts`：冻结计算样式和可读 Canvas；内联 SVG 实际使用的已加载 data 字体。
@@ -26,22 +28,24 @@
 - 等 `tikzjax-load-finished` 后的微任务取得优化 SVG；尺寸变化走原有重测。
 - 失败或超过 60 秒保留源码；重新打开可重试。导出前等待产物准备，将最终 SVG 和已加载字体写入副本。
 
-## CodeTab 的可选宿主协议
+## CodeTab OpenAPI
 
-CodeTab 普通 Markdown 处理器按文件位置直接写盘。节点片段没有可靠的原文件行号，因此活动组件采用双方约定的 DOM 事件；它不是 Obsidian 内置 API，也不读取另一插件的内部对象。
+CodeTab 普通 Markdown 处理器按文件位置直接写盘。节点片段没有可靠的原文件行号，因此活动组件通过 CodeTab 的公开 API 注入宿主保存回调；它不是 Obsidian 内置 API，也不读取另一插件的内部对象。
 
-- 在容器所属 `Document` 派发 `obsidian-codeblock-render`；请求为 `CustomEvent.detail`。
-  - `version: 1`、`language: 'tab'`。
+- 在容器所属 `Document` 派发 `obsidian-code-tab-api`，提供者同步填入 `detail.api`；调用 `api.render(options)` 并保存返回的句柄。
   - `source`：完整块体，不含外层围栏；`sourcePath`：真实笔记路径，供相对链接与嵌入解析。
   - `id`：本引擎会话内稳定组 ID，不依赖片段行号。
   - `container`、`component`：真实容器与已加载 Obsidian Component；子组件和监听随它清理。
   - `readOnly`：只读模式；无保存回调时同样只读。
   - `onChange(expected, next)`：异步正文提交；`next: null` 删除围栏块。Promise 兑现表示宿主接受提交，磁盘保存沿原管线继续执行。
-  - `onEditingChange(editing)`：通知宿主保护正在编辑的组件。
-  - `handled`：初始 false，处理器同步置 true；`completion`：处理器同步提供初次渲染 Promise。
+- 源码与路径变化调用 `handle.update()`，不触发保存回声；Busy 不覆盖正文、标题或删除确认，保留最新宿主值，通过订阅通知异步重试。禁止保存回调同步等待同句柄 update。
+- 内部 DOM/状态通知只同步槽位和尺寸；只有引擎提供的新树才可更新权威源码，避免缓存旧内容覆盖刚接受的提交。
+- RenderFailed 可能发生在内容已接受之后；重试 update 恢复预览，不再次提交或撤销已接受正文。
 - 宿主模式的正文编辑、增删标签、改名和排序都调用 `onChange`，不调用 CodeTab 原有 Vault 写入路径。
 - 控件与编辑区域处理自己的鼠标和键盘事件，其余节点区域交给导图；只读嵌入可切页，禁用内容编辑和标签管理。
-- 旧 CodeTab 无接口时保留代码回退，并在控制台说明原因；完整功能需同时安装配套分支的 CodeTab 产物。
+- 节点重排移动同一活动 DOM；节点删除或引擎销毁释放句柄、订阅、Component，取消未提交草稿，不撤销已接受保存。
+- CodeTab 原生编辑器自动使用它自己的补全；导图不注册重复的 CodeMirror 扩展，也不释放共享 api.completion。
+- API 不可用时保留代码回退，并在控制台说明原因；只支持新接口。CodeTab 停用后旧句柄失效，宿主后续布局/渲染重新发现并挂载；启用前已存在的弹出窗口若无发现监听，重新打开窗口。
 
 ## 扩展与验证
 

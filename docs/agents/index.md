@@ -105,6 +105,8 @@
     - **rendering/**
       - **plugins/**
         - [bridge.ts](../../src/platform/rendering/plugins/bridge.ts)
+        - [code-tab-api.d.ts](../../src/platform/rendering/plugins/code-tab-api.d.ts)
+        - [code-tab.ts](../../src/platform/rendering/plugins/code-tab.ts)
         - [fonts.ts](../../src/platform/rendering/plugins/fonts.ts)
         - [native.ts](../../src/platform/rendering/plugins/native.ts)
         - [owner.ts](../../src/platform/rendering/plugins/owner.ts)
@@ -249,6 +251,7 @@
 
 - **tests/**：按主要被测模块对齐源码；组合入口测试与 `setup.ts` 留在根目录（K211）。
   - **contracts/**：工程契约、构建与工具链校验
+    - [install.test.ts](../../tests/contracts/install.test.ts)
     - [agents-md-sync.test.ts](../../tests/contracts/agents-md-sync.test.ts)
     - [check-gates.test.ts](../../tests/contracts/check-gates.test.ts)
     - [css-build.test.ts](../../tests/contracts/css-build.test.ts)
@@ -321,6 +324,8 @@
     - [viewport.test.ts](../../tests/engine/viewport.test.ts)
   - **platform/**：Obsidian 平台集成
     - **rendering/**
+      - **plugins/**
+        - [code-tab.test.ts](../../tests/platform/rendering/plugins/code-tab.test.ts)
       - **code/**
         - [prism-code.test.ts](../../tests/platform/rendering/code/prism-code.test.ts)
       - **math/**
@@ -423,11 +428,13 @@
 
 ## 工具配置与脚本
 
+- [Makefile](../../Makefile)：构建、检查与本地安装入口。
 - **config/**：显式加载的构建与检查配置（K212）。
   - [esbuild.config.mjs](../../config/esbuild.config.mjs)
   - [knip.json](../../config/knip.json)
   - [stylelint.config.mjs](../../config/stylelint.config.mjs)
 - **scripts/**：工具执行入口与共享工具逻辑。
+  - [install.mjs](../../scripts/install.mjs)
   - [build-vendor.mjs](../../scripts/build-vendor.mjs)
   - [check-gates.d.mts](../../scripts/check-gates.d.mts)
   - [check-gates.mjs](../../scripts/check-gates.mjs)
