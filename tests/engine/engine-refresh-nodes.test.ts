@@ -36,6 +36,16 @@ function fakeNode(): FakeNode {
 }
 
 describe('refreshNodesCustomContent（P4 批量重排）', () => {
+	it('保留活编辑器 DOM，只更新尺寸；与普通节点混批仍只 render 一次', () => {
+		const editor = { reRender: vi.fn(), getSize: vi.fn(), customNodeContentRealtimeLayout: vi.fn() };
+		const ordinary = fakeNode(); const render = vi.fn();
+		refreshNodesCustomContent({ render } as never, [editor, ordinary] as never, new Set([editor]) as never);
+		expect(editor.getSize).toHaveBeenCalledWith([], { ignoreUpdateCustomTextWidth: true });
+		expect(editor.customNodeContentRealtimeLayout).toHaveBeenCalledOnce();
+		expect(editor.reRender).not.toHaveBeenCalled();
+		expect(ordinary.reRender).toHaveBeenCalledWith(['custom'], { ignoreUpdateCustomTextWidth: true });
+		expect(render).toHaveBeenCalledOnce();
+	});
 	it('每个节点重建一次、全树 render 恰好一次', () => {
 		const nodes = [fakeNode(), fakeNode(), fakeNode()];
 		const render = vi.fn();

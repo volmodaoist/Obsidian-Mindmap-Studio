@@ -139,6 +139,7 @@
       - [content-code.styles.ts](../../src/ui/node-content/content-code.styles.ts)
       - [content-code.ts](../../src/ui/node-content/content-code.ts)
       - [content-plugin.ts](../../src/ui/node-content/content-plugin.ts)
+      - [content-plugin.css](../../src/ui/node-content/content-plugin.css)
       - [content-common.styles.ts](../../src/ui/node-content/content-common.styles.ts)
       - [content-context.ts](../../src/ui/node-content/content-context.ts)
       - [content-copy.styles.ts](../../src/ui/node-content/content-copy.styles.ts)
@@ -367,6 +368,7 @@
       - [content-remeasure.test.ts](../../tests/features/content/content-remeasure.test.ts)
       - [node-codeblock.test.ts](../../tests/features/content/node-codeblock.test.ts)
       - [node-content-write.test.ts](../../tests/features/content/node-content-write.test.ts)
+      - [plugin-content-session.test.ts](../../tests/features/content/plugin-content-session.test.ts)
       - [node-inline-content.test.ts](../../tests/features/content/node-inline-content.test.ts)
       - [node-inline-tag.test.ts](../../tests/features/content/node-inline-tag.test.ts)
       - [view-footnote.test.ts](../../tests/features/content/view-footnote.test.ts)
@@ -409,6 +411,7 @@
   - **mocks/**：宿主替身
     - [obsidian.ts](../../tests/mocks/obsidian.ts)
   - **fixtures/**：共享测试样本
+    - [plugin-content-width.txt](../../tests/fixtures/plugin-content-width.txt)：Linux 管道标签块原文，用于代码自动宽度回归。
     - **roundtrip/**
       - [01-comprehensive.md](../../tests/fixtures/roundtrip/01-comprehensive.md)
       - [02-tables-quotes-html.md](../../tests/fixtures/roundtrip/02-tables-quotes-html.md)
@@ -482,9 +485,9 @@
 | `src/features/relations/view-node-relation.ts` | 766 | 联系的**全部编辑入口**：建边（源/目标两行 + 手绘 `geo` 一次批量 raw 提交）、删边（目标再无入边时**一并回收它的 `%%id%%`**）、**线色（右键线「联系配色」，写 `%%rel%%` 的 `color=` 段）**、改标签、删节点清入边 + 回收它曾指向的孤儿 id（只改 data、并进删除那一步撤销；被删实例按身份排除——实例树滞后于数据树，K153）、点选模式与双击拦截。共用同一份「节点 → 新指令行 → raw」的合成（`rawWithState`）与「目标 id 显示名」的反查；拆开会让「谁负责改哪一行」跨文件漂移。 |
 | `src/engine/mindmap.ts` | 838 | 引擎防腐层的**唯一对外入口（barrel）**，同时承接实例创建/销毁、主题配置、性能模式与生命周期编排。创建时的渲染监听、测量残渣清理、历史播种、主题刷新和销毁必须围绕同一实例收尾；各引擎能力实现已经分入层内子模块，vendor 私有形态仍限定在 engine 层。职责收口是层与入口契约，不按导出数量机械拆分。拆分前增长史及历次规模记录见 `line-count-log.md`。 |
 | `src/engine/mindmap-viewport.ts` | 990 | 画布几何与视口防腐面（2026-10-16 自 `mindmap.ts` 拆出）：实时容器几何同步、数据层/DOM 双口径内容盒测量、fit、居中与「渲染落地后居中补正」、缩放/平移、视口状态读写与签名。与 `math-jax` 同性质——就绪/几何口径只此一处，拆开会让该口径跨文件漂移。2026-10-25：新增「内容原尺寸」（`readContentSizeInLayout`）与「100% 下是否装不下」（`contentExceedsCanvasAtFullScale`）；同批把数据层「全树节点盒并集」委托给 `core/minimap-geometry.measureMiniMapBounds`（该并集只留一份实现）。 |
-| `src/engine/mindmap-nodes.ts` | 964 | 节点查询与工具 + 文本编辑防腐面（2026-10-16 自 `mindmap.ts` 拆出）：节点/DOM 反查、节点文本与图片尺寸、自绘内容重建、兄弟上/下移、`renderer.textEdit`/`node_dblclick` 收口。2026-11-11 增至 920：新增 `collectRenderNodeData`（渲染树节点 data 的文档序快照——**会话权威树没有 uid**，uid 由 `ensureUniqueUids` 补在建引擎前的克隆上，凡「按 uid 定位」的索引只能读引擎侧）与 `revealNodeByUid`（展开祖先 → 移到视口中心，**不选中**：按引擎三步自己组合、去掉 `active()`，避免高亮圈住表格 / chip；三件缺失才回退 `goTargetNode`；不写 data / 历史）。 |
+| `src/engine/mindmap-nodes.ts` | 976 | 节点查询与工具 + 文本编辑防腐面（2026-10-16 自 `mindmap.ts` 拆出）：节点/DOM 反查、节点文本与图片尺寸、自绘内容重建、兄弟上/下移、`renderer.textEdit`/`node_dblclick` 收口。2026-11-11 增至 920：新增 `collectRenderNodeData`（渲染树节点 data 的文档序快照——**会话权威树没有 uid**，uid 由 `ensureUniqueUids` 补在建引擎前的克隆上，凡「按 uid 定位」的索引只能读引擎侧）与 `revealNodeByUid`（展开祖先 → 移到视口中心，**不选中**：按引擎三步自己组合、去掉 `active()`，避免高亮圈住表格 / chip；三件缺失才回退 `goTargetNode`；不写 data / 历史）。 |
 | `src/engine/mindmap-theme-presets.ts` | 375 | 外观预设的**唯一数据表**（只放数据、零分支）：边框预设（`THEME_STYLE_PRESETS`）、整篇配色五档 × 亮暗（`PALETTES`）、节点级填充 / 线条成对表（`NODE_COLORS`）+ 反查 `nodeLineColorOf`。2026-11-05 由 191 行增至 369：节点指令色改「直出」后，线条必须是**同色相深一档**，配对表与整篇色板放在同一文件才能保证「同一套色的两种用途」不各写一份色值（拆开即逼出第二份色板，改色必然漂移）；`nodeLineColorOf` 与 `PALETTES` 共用 `domain/color` 的 HSL 阶梯，同一把尺子。与 `i18n` / `constants` 同性质：拆分的唯一收益是行数。 |
-| `src/features/content/content-remeasure.ts` | 546 | 「自绘内容定稿 → 尺寸同步」会话：三条不变式（同帧合批 `setTimeout(0)` / 按 holder 反查真实节点 / 渲染窗口只重试一次）**加第四条可见性不变式**（2026-10-14）——「隐藏态不测量」与「由隐藏转可见的四路自愈」必须与前三者共享同一份回退链（holders → 产物反查 → 暂存重试），拆开会让 `flush` / `retryDeferred` / 字体批次各自维护一份可见性判定，必然漂移；文件头 ④ 记录实机证据与官方判据（`Element.isShown()`）。2026-10-14 增至 460：新增 ⑤ 未定稿修复（三钩子触发 + 宿主画布根作用域，见第十批）。**2026-10-14 十一批增至 492**：清理点改 `forgetEngine`（按引擎身份清，`pruneUnsettledMathOwnedBy`）；`resetNodes` **不再动登记面**（它跑在首帧渲染前，正是误清高危时刻）。**2026-10-14 十二批增至 502**：`recoverHidden` 补可见性守卫（自愈拍到期前又隐藏时不测量、脏标记保留——否则 0×0 写回且此后不再自愈）。 |
+| `src/features/content/content-remeasure.ts` | 556 | 「自绘内容定稿 → 尺寸同步」会话：三条不变式（同帧合批 `setTimeout(0)` / 按 holder 反查真实节点 / 渲染窗口只重试一次）**加第四条可见性不变式**（2026-10-14）——「隐藏态不测量」与「由隐藏转可见的四路自愈」必须与前三者共享同一份回退链（holders → 产物反查 → 暂存重试），拆开会让 `flush` / `retryDeferred` / 字体批次各自维护一份可见性判定，必然漂移；文件头 ④ 记录实机证据与官方判据（`Element.isShown()`）。2026-10-14 增至 460：新增 ⑤ 未定稿修复（三钩子触发 + 宿主画布根作用域，见第十批）。**2026-10-14 十一批增至 492**：清理点改 `forgetEngine`（按引擎身份清，`pruneUnsettledMathOwnedBy`）；`resetNodes` **不再动登记面**（它跑在首帧渲染前，正是误清高危时刻）。**2026-10-14 十二批增至 502**：`recoverHidden` 补可见性守卫（自愈拍到期前又隐藏时不测量、脏标记保留——否则 0×0 写回且此后不再自愈）。 |
 | `src/features/mindmap-codeblock.ts` | 765 | Markdown 代码块只读嵌入（语言键 `mindmap`）的**单一关注点**：块体解析 → 只读引擎装配（`readonly: true` + `enableViewDrag: false`）→ **容器高度随内容**（按宽度适配量测 + 写内联高度 + 请引擎重排）→ **容器宽度变化即重排**（观察器**先建且常驻**：首帧同步挂载成功也注册，否则高度口径锁死在首帧、内容被 `overflow: hidden` 裁掉；重排在**下一帧**落（`deferFit`），在 RO 回调里写布局会被 Chrome 记 `ResizeObserver loop…` 实机可见）→ 滚轮归宿主页面（capture 拦截；引擎 `onMousewheel` 无条件 preventDefault）→ 超限降级只读大纲 → 生命周期收尾（观察器/事件/尺寸会话/引擎/卸载即清 DOM）是一条不可分割的链；拆开会让「解析口径、零尺寸等待、尺寸反馈环、销毁顺序」四处漂移。**不写 data.json**（用户裁决 2026-10-13）。 |
 | `src/markdown/md-footnote.ts` | 316 | 脚注的**唯一判定面**：定义语法（`parseFootnoteDefinition` / `isFootnoteDefinition`，解析层的链接引用定义豁免也委托它）、逐行分类（`forEachFootnoteLine` 同时服务渲染期剥离与全文索引——拆开必然出现「显示剥了、索引没剥」）、id 字符类（`FOOTNOTE_ID_SOURCE`，行内引用正则从它拼）。2026-11-12 增至 315：续行改按**相对内容起始列的缩进**判定（`indentOf`：优先解析层 `mdContinuationIndents`，否则行首空白），同列的非空行不再被当成续行隐藏；行分类与 id 语法各自只留一份实现（硬规则 5）。 |
 | `src/markdown/md-serialize.ts` | 1072 | 逐字回写 与 合成回写 的判定/合成必须共享同一份「节点是否被编辑」上下文（`rawOk` 一族谓词），拆分会把它切成跨文件的隐式协议。**2026-11-08 增至 997**：「跟随兄弟风格」改为按**位置**判（`SerializeFrame.lastWasList`，层首仍看整层）——只看整层会让混排组里排在标题之后的新建节点写出列表项、重开被读成该标题的子节点（K172）。嵌入拼写走 `domain/wikilink.formatEmbedWikilink`，注意 `embedLabelSuffix` 返回值**带前导 `\|`** 需去前缀。2026-10-12 增至 1189：无显示名段（首图 / icon-only URL）的**锚点插入点**反查（`anchorInsertPoint` / `insertionForm`）与替换型 slot 共用同一遍行内拼装，拆开会让「文本定位」与「锚点定位」各持一份区间占用判定。2026-10-13 到 1191：`serializeMdBody` 内的 `nodeLines` 去掉遮蔽外层入参的冗余 `app` 形参 |

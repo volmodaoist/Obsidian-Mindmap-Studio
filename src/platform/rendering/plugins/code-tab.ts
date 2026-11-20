@@ -24,15 +24,18 @@ export class CodeTabSession {
 	private queued = false;
 	private closed = false;
 	private notifications = 0;
+	private editingNow = false;
 	private readonly unsubscribe: () => void;
 
 	constructor(private readonly api: CodeTabApi, private readonly handle: CodeTabHandle, private readonly changed: () => void) {
-		this.unsubscribe = handle.subscribe(() => {
+		this.unsubscribe = handle.subscribe(snapshot => {
+			this.editingNow = snapshot.editing;
 			this.notifications++;
 			this.schedule();
 			changed();
 		});
 	}
+	get editing(): boolean { return !this.closed && this.editingNow; }
 
 	get active(): boolean {
 		if (this.closed) return false;

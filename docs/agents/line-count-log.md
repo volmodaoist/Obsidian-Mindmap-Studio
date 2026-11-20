@@ -729,3 +729,12 @@
 - 全部 check:gates 通过：类型/构建、133 文件/3375 项测试、lint、CSS lint、knip、真实 Chrome 与发布元数据。仅更新已有消息断言，没有增加机械品牌字符串测试；未新增源码文件，46 条豁免与行数保持一致。
 - 已通过 make install 更新云笔记的 mindmap-studio 三件套；名称、作者、三个 SHA256 与当前构建逐项一致，旧设置保留。备份和证据 `/tmp/oh-my-mindmap-studio-brand-install.json`；未自动重启 Obsidian，用户重启后查看新名称。
 - 未提交、推送或修改远程仓库名称；版本仍为 0.3.3。
+
+> **2026-11-20 活动 CodeTab 节点自动宽度（K219）**
+
+- 在独立 fix/plugin-content-width 修复固定 468px 活组件与 500px 外层预算的耦合；自动 CodeTab 使用当前代码内容宽度，节点外层可增长，代码/字符图保留行形状，标签栏保持原滚动；普通正文仍按预算，手动设宽优先。局部 CSS 在 node-content 旁置并汇总到发布样式，没有修改 Beyond-CodeTab 或 vendor。
+- 连续输入的尺寸更新由引擎防腐层 getSize([])/customNodeContentRealtimeLayout 原地测量/更新外框和 foreignObject，保留编辑 DOM 与焦点，混批只 render 一次。插件保存遇 renderer.root 短暂为空等待同一引擎落地再查节点，恢复后仍做块原文冲突检查；换引擎、真实删除或陈旧源拒绝写入。
+- 真实 OS 管道标签块体沉淀为 tests/fixtures/plugin-content-width.txt；增加自动/固定宽度、公开编辑状态、保留 DOM 的尺寸编排和渲染窗口保存直测。索引、K219、决策、渲染桥与测试说明同步；豁免行数回填 engine/mindmap-nodes 976、content-remeasure 556，46 条豁免/未登记超限 0。
+- 完整 check:gates 通过：构建/类型、134 文件/3384 项测试、lint、CSS lint、knip、真实 Chrome（720 组节点内容及原有布局/拖拽/导出回归）。CSS 为覆盖宿主/CodeTab 的已有 important 规则保留必要 important，仅有 warning、无 error；未添加运行时依赖。main.js 为 1,516,505 字节。
+- 最终实际 Obsidian + 已安装 Beyond-CodeTab/TikZJax 的 14 项联测通过、运行时错误 0：内容宽 468 → 640px，节点 foreignObject 为约 672.34px，代码 214px 高与原始行数匹配；宽度收回、原生键盘/粘贴、焦点、保存/共享撤销、宽代码 SVG、固定宽度、只读、停启与改名路径覆盖。报告 `/var/folders/zf/srfxv0kd7vn459nd5bs72j0c0000gn/T/mindmap-plugin-e2e-11Ngsb/report.json`。测试操作限定当前视图/foreignObject，撤销恢复节点后重新取得对应句柄；只读操作与其开始时的正文比较，避免混用早期编辑前基线。
+- 已经 make install 覆盖云笔记的 MindMap Studio 三件套并验证 SHA256/原设置；与联测相同的 Beyond-CodeTab 三项产物已逐项比对。备份与记录 `/tmp/oh-my-mindmap-plugin-width-install.json`；未自动重启 Obsidian，未提交/推送，用户重启后验收实际主题与操作手感。

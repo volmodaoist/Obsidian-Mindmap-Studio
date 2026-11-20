@@ -6,7 +6,7 @@ function fixture() {
 	const snapshot: CodeTabSnapshot = { source: 'original', revision: 0, tabs: [], activeIndex: null,
 		readOnly: false, editing: false, saving: false, rendering: false };
 	const listeners = new Set<(value: CodeTabSnapshot) => void>();
-	const notify = () => listeners.forEach(listener => listener(snapshot));
+	const notify = (value = snapshot) => listeners.forEach(listener => listener(value));
 	const update = vi.fn(async (_patch: CodeTabUpdate) => undefined);
 	const dispose = vi.fn();
 	const unsubscribe = vi.fn();
@@ -75,6 +75,13 @@ describe('CodeTab OpenAPI discovery and mount', () => {
 });
 
 describe('CodeTab latest host value synchronization', () => {
+	it('tracks the public editing state for focus-preserving node size updates', () => {
+		const data = fixture(); const session = new CodeTabSession(data.api, data.handle, data.changed);
+		expect(session.editing).toBe(false);
+		data.notify({ ...data.snapshot, editing: true }); expect(session.editing).toBe(true);
+		data.notify({ ...data.snapshot, editing: false }); expect(session.editing).toBe(false);
+		session.dispose(); expect(session.editing).toBe(false);
+	});
 	it('coalesces pending source and path changes without calling the host save callback', async () => {
 		const data = fixture(); const session = new CodeTabSession(data.api, data.handle, data.changed);
 		session.update({ source: 'first' }); session.update({ source: 'last' }); session.update({ sourcePath: 'Moved.md' });

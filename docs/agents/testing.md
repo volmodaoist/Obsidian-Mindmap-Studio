@@ -295,4 +295,5 @@ Obsidian DOM 助手，而这道门禁在 CI 里是 `continue-on-error` —— �
 - 内容装配：节点内容测试覆盖超长已登记围栏的完整源码；共享会话测试覆盖陈旧视图不能提交。
 - `scripts/visual-plugin-content.mjs` 进入 `verify:visual`，用真实 Chrome 的替身处理器验证惰性启动、活动 DOM/按钮复用、异步 SVG、尺寸、导出及删除/关闭清理；桥与接口变更触发门禁。
 - `scripts/verify-plugin-obsidian.mjs` 使用实际 TikZJax 与配套 CodeTab，在独立临时 Obsidian 库验证零写盘打开、标签切换增高、编辑焦点、正文保存、共享撤销、增改标签、SVG 冻结与只读嵌入。运行参数、版本依赖和边界见 [渲染桥说明](../plugin-content-rendering.md)。
+- 自动宽度回归使用 `tests/fixtures/plugin-content-width.txt` 的真实管道代码：短页/宽页切换、逐字输入和原生粘贴、未折行的字符图、固定宽度优先及宽代码导出。`engine-refresh-nodes.test.ts`/`content-remeasure.test.ts` 验证编辑节点保留 DOM 的尺寸批处理；`plugin-content-session.test.ts` 验证渲染窗口等待、原文冲突与切引擎拒绝写入。
 - 替身 Chrome 验证不等同于第三方插件实际运行；两类证据分别记录。实际库中的主题、缩放和日常插件组合仍由用户验收。

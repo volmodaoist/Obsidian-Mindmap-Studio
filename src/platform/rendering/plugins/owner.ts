@@ -1,7 +1,7 @@
 /** 单引擎插件会话：惰性挂载、活动组件迁移、冻结测量与编辑保护。 */
 import { Component } from 'obsidian';
 import type { App, EventRef } from 'obsidian';
-import { PLUGIN_SLOT_CLASS, PLUGIN_SLOT_ID, PLUGIN_LIVE_CLASS, PLUGIN_INTERACTIVE_ATTR } from '../../../core/plugin-content-types';
+import { PLUGIN_SLOT_CLASS, PLUGIN_SLOT_ID, PLUGIN_LIVE_CLASS, PLUGIN_INTERACTIVE_ATTR, PLUGIN_AUTO_WIDTH_ATTR } from '../../../core/plugin-content-types';
 import type { PluginBlockRequest } from '../../../core/plugin-content-types';
 import { fencedNodeBlocks, normalizeBlockSource } from '../../../markdown/md-codeblocks';
 import { pluginPresentation } from './snapshot';
@@ -23,7 +23,7 @@ interface Entry extends Specification {
 	id: string; nodeId: string; index: number; root: HTMLElement | null; stage: HTMLElement | null;
 	component: Component | null; controller: AbortController; snapshot: HTMLElement | null;
 	slot: HTMLElement | null; ready: boolean; failed: boolean;
-	width: number; height: number; widthHint: number; resize: ResizeObserver | null;
+	width: number; height: number; widthHint: number; autoWidth: boolean; resize: ResizeObserver | null;
 	session: CodeTabSession | null; failedProvider: CodeTabApi | null; work: Promise<void> | null; focused: HTMLElement | null;
 }
 
@@ -51,7 +51,7 @@ export class PluginOwnerSession {
 			entry = { ...spec, id: `${this.prefix}:${key}`, nodeId: request.nodeId, index: request.index,
 				root: null, stage: null, component: null, controller: new AbortController(), snapshot: null,
 				slot: null, ready: false, failed: false, width: 0, height: 0,
-				widthHint: request.availableWidth ?? 468, resize: null, session: null, failedProvider: null, work: null, focused: null };
+				widthHint: request.availableWidth ?? 468, autoWidth: request.autoWidth === true, resize: null, session: null, failedProvider: null, work: null, focused: null };
 			this.entries.set(key, entry);
 			const current = entry;
 			this.deps.onEntry(entry.id, () => {
@@ -61,8 +61,8 @@ export class PluginOwnerSession {
 			});
 		}
 		entry.widthHint = request.availableWidth ?? 468;
-		if (entry.stage) entry.stage.style.width = `${entry.widthHint}px`;
-		if (entry.root) { entry.root.style.width = `${entry.widthHint}px`; entry.root.style.maxWidth = `${entry.widthHint}px`; }
+		entry.autoWidth = request.autoWidth === true;
+		this.applyWidth(entry);
 		request.holder.setAttribute(PLUGIN_SLOT_ID, entry.id);
 		return entry.snapshot ? entry.snapshot.cloneNode(true) as HTMLElement : null;
 	}
@@ -129,13 +129,14 @@ export class PluginOwnerSession {
 			Object.assign(this.parking.style, { position: 'fixed', left: '-100000px', top: '0', pointerEvents: 'none' });
 			doc.body.appendChild(this.parking);
 		}
-		const stage = doc.createElement('div'); stage.style.width = `${entry.widthHint}px`;
+		const stage = doc.createElement('div');
 		this.parking.appendChild(stage); entry.stage = stage;
 		const root = doc.createElement('div'); root.className = `${PLUGIN_LIVE_CLASS} markdown-rendered`;
-		Object.assign(root.style, { display: 'inline-block', width: `${entry.widthHint}px`, maxWidth: `${entry.widthHint}px`, whiteSpace: 'normal',
+		Object.assign(root.style, { display: 'inline-block', whiteSpace: 'normal',
 			fontSize: 'var(--font-text-size, 16px)', color: 'var(--text-normal)', backgroundColor: 'var(--background-primary)',
 			pointerEvents: entry.adapter.mode === 'static' ? 'none' : 'auto' });
 		if (entry.adapter.host) stage.appendChild(root); entry.root = root;
+		this.applyWidth(entry);
 		const controller = entry.controller;
 		const component = new Component(); component.load(); entry.component = component;
 		const stopControlEvent = (event: Event): void => {
@@ -176,6 +177,17 @@ export class PluginOwnerSession {
 		});
 	}
 
+	private applyWidth(entry: Entry): void {
+		const width = `${entry.widthHint}px`;
+		if (entry.stage) Object.assign(entry.stage.style, { width: entry.autoWidth ? 'max-content' : width });
+		if (!entry.root) return;
+		if (entry.autoWidth) entry.root.setAttribute(PLUGIN_AUTO_WIDTH_ATTR, '');
+		else entry.root.removeAttribute(PLUGIN_AUTO_WIDTH_ATTR);
+		Object.assign(entry.root.style, { width: entry.autoWidth ? 'max-content' : width,
+			maxWidth: entry.autoWidth ? 'none' : width, minWidth: entry.autoWidth ? width : '0' });
+		entry.root.style.setProperty('--mindmap-plugin-text-width', width);
+	}
+
 	private updateSize(entry: Entry): void {
 		if (!entry.ready || !entry.root || !entry.slot || entry.root.parentElement !== entry.slot) return;
 		const active = entry.root.ownerDocument.activeElement;
@@ -203,6 +215,9 @@ export class PluginOwnerSession {
 		entry.width = 0; entry.height = 0; entry.work = null; entry.session = null; entry.failedProvider = null;
 	}
 	get hasEntries(): boolean { return this.entries.size > 0; }
+	get editingNodeIds(): ReadonlySet<string> {
+		return new Set(Array.from(this.entries.values()).filter(entry => entry.session?.editing).map(entry => entry.nodeId));
+	}
 	async prepare(): Promise<ReadonlySet<string>> {
 		if (!this.canvas || this.closed) return new Set();
 		this.sync(this.canvas);

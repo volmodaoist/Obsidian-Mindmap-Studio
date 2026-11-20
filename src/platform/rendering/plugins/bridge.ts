@@ -41,6 +41,7 @@ export function syncPluginContents(root: HTMLElement, owner: object, sources: Re
 	owners.get(owner)?.sync(root, sources);
 }
 export function hasPluginContents(owner: object): boolean { return owners.get(owner)?.hasEntries ?? false; }
+export function getEditingPluginNodeIds(owner: object): ReadonlySet<string> { return owners.get(owner)?.editingNodeIds ?? new Set(); }
 export function disposePluginContents(owner: object): void { owners.get(owner)?.dispose(); owners.delete(owner); }
 
 /** 导出只替换克隆槽位，活 DOM 与事件始终留在画布中。 */

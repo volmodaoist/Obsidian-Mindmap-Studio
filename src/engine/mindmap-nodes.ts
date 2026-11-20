@@ -547,12 +547,24 @@ export function isNodeCollapsed(node: MindMapNode): boolean {
 export function refreshNodesCustomContent(
 	mindMap: MindMap | null,
 	nodes: readonly MindMapNode[],
+	keepExisting?: ReadonlySet<MindMapNode>,
 ): void {
 	if (!mindMap || nodes.length === 0) {
 		return;
 	}
 	for (const node of nodes) {
 		try {
+			// 活编辑器必须保留现有 foreignObject：reRender/layout 会清 group 并丢失焦点。
+			// 使用引擎原有实时尺寸路径，重测 DOM 后只替换外框、更新 foreignObject 的尺寸。
+			const live = node as unknown as {
+				getSize?: (keys: string[], options: { ignoreUpdateCustomTextWidth: boolean }) => boolean;
+				customNodeContentRealtimeLayout?: () => void;
+			};
+			if (keepExisting?.has(node) && typeof live.getSize === 'function' && typeof live.customNodeContentRealtimeLayout === 'function') {
+				live.getSize([], { ignoreUpdateCustomTextWidth: true });
+				live.customNodeContentRealtimeLayout();
+				continue;
+			}
 			const target = node as unknown as {
 				reRender?: (
 					keys: string[],

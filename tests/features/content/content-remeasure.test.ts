@@ -39,6 +39,7 @@ vi.mock('../../../src/engine/mindmap', () => ({
 
 const plugins = vi.hoisted(() => ({
 	hasPluginContents: vi.fn(), syncPluginContents: vi.fn(), disposePluginContents: vi.fn(),
+	getEditingPluginNodeIds: vi.fn(),
 }));
 vi.mock('../../../src/platform/rendering/plugins/bridge', () => plugins);
 
@@ -57,7 +58,7 @@ vi.mock('../../../src/platform/rendering/math/math-jax', () => ({
 
 /** holder 与节点桩：对会话而言都是不透明引用（编排逻辑只看身份） */
 const holder = (): HTMLElement => ({}) as unknown as HTMLElement;
-const node = (uid: string): MindMapNode => ({ uid }) as unknown as MindMapNode;
+const node = (uid: string): MindMapNode => ({ uid, getData: () => ({ uid }) }) as unknown as MindMapNode;
 
 /** 字体面桩：记录 loadingdone 监听并可手动触发 */
 function makeFontSet() {
@@ -129,6 +130,7 @@ describe('ContentRemeasureSession（自绘内容定稿 → 尺寸同步会话）
 		engine.getRenderRoot.mockReset();
 		engine.collectRenderNodeData.mockReset();
 		plugins.hasPluginContents.mockReset(); plugins.hasPluginContents.mockReturnValue(false);
+		plugins.getEditingPluginNodeIds.mockReset(); plugins.getEditingPluginNodeIds.mockReturnValue(new Set());
 		plugins.syncPluginContents.mockReset(); plugins.disposePluginContents.mockReset();
 	});
 
@@ -175,6 +177,13 @@ describe('ContentRemeasureSession（自绘内容定稿 → 尺寸同步会话）
 			n2,
 			n3,
 		]);
+	});
+	it('活插件编辑时将保留 DOM 的节点集合交给引擎，仍使用同一批重排', () => {
+		const editor = node('editing'); const ordinary = node('ordinary');
+		plugins.getEditingPluginNodeIds.mockReturnValue(new Set(['editing']));
+		engine.resolveNodesByDoms.mockReturnValue([editor, ordinary]);
+		session.schedule(holder()); session.schedule(holder()); vi.advanceTimersByTime(0);
+		expect(engine.refreshNodesCustomContent).toHaveBeenCalledExactlyOnceWith(map, [editor, ordinary], new Set([editor]));
 	});
 
 	it('批次窗口内引擎已销毁（getMindMap → null）：静默结束，不反查不重排不告警', () => {

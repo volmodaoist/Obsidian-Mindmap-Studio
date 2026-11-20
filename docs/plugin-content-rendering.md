@@ -14,6 +14,7 @@
   - `code-tab.ts`：API 发现、活动句柄、串行更新、Busy 最新值重试和订阅清理。
   - `code-tab-api.d.ts`：复制 CodeTab 构建产物 `dist/code-tab-api.d.ts`，仅类型导入；不复制其运行时和补全 Core。
   - `owner.ts`：真实 foreignObject 槽位出现后才创建组件。重排迁移同一活动 DOM，保留按钮事件与编辑器焦点。
+  - 自动宽度的 CodeTab 根元素使用内容尺寸；UI 外层使用可增长的内联宽度，静态图、普通节点与手动固定宽度保持原有预算。`content-plugin.css` 仅覆盖导图自动模式的代码/编辑器布局，不更改 Beyond-CodeTab 的普通 Markdown 外观。
   - `bridge.ts`：唯一登记与导出入口；节点删除、引擎销毁时释放组件、观察器及产物登记。
   - `snapshot.ts`、`fonts.ts`：冻结计算样式和可读 Canvas；内联 SVG 实际使用的已加载 data 字体。
 - `src/features/content/`
@@ -40,6 +41,9 @@ CodeTab 普通 Markdown 处理器按文件位置直接写盘。节点片段没�
   - `onChange(expected, next)`：异步正文提交；`next: null` 删除围栏块。Promise 兑现表示宿主接受提交，磁盘保存沿原管线继续执行。
 - 源码与路径变化调用 `handle.update()`，不触发保存回声；Busy 不覆盖正文、标题或删除确认，保留最新宿主值，通过订阅通知异步重试。禁止保存回调同步等待同句柄 update。
 - 内部 DOM/状态通知只同步槽位和尺寸；只有引擎提供的新树才可更新权威源码，避免缓存旧内容覆盖刚接受的提交。
+- 自动节点按当前可见标签的代码行宽更新，长代码与字符图不强制折行，切回短页可收回；标签栏仍可滚动，普通段落保留阅读宽度预算，手动宽度优先。原生代码编辑器的行/外壳参与自然测宽，控件和光标层不计入正文宽度。
+- 公开编辑状态传到尺寸批处理。编辑中用引擎现有 `getSize([])` 和 `customNodeContentRealtimeLayout()` 重测并更新外框/foreignObject，保留活动 DOM 与焦点；这些访问仅在引擎防腐层。源码变化与普通节点仍用原有内容重建，混批只 render 一次。
+- 保存查找遇到渲染树根节点暂时为空时等待同一引擎渲染完成；再查节点并核对最新块原文，不把布局窗口误判成删除，不接受换视图或陈旧写入。
 - RenderFailed 可能发生在内容已接受之后；重试 update 恢复预览，不再次提交或撤销已接受正文。
 - 宿主模式的正文编辑、增删标签、改名和排序都调用 `onChange`，不调用 CodeTab 原有 Vault 写入路径。
 - 控件与编辑区域处理自己的鼠标和键盘事件，其余节点区域交给导图；只读嵌入可切页，禁用内容编辑和标签管理。
@@ -62,5 +66,6 @@ node scripts/verify-plugin-obsidian.mjs
 ```
 
 - 脚本使用独立临时配置与 vault，不复制日常插件设置；结束后关闭自己的进程，保留截图、Markdown、SVG 和报告。
+- `tests/fixtures/plugin-content-width.txt` 保存实际 Linux 管道标签块体。宿主回归覆盖宽度增长/收回、字符图不折行、真实键盘/粘贴、固定宽度和宽代码导出；只在真实导图 foreignObject 中定位组件，撤销恢复节点身份后重新取得对应句柄。
 - `TIKZ_SOURCE` 可指定 `.tex` 样本；`MINDMAP_OBSIDIAN_BIN`、`MINDMAP_OBSIDIAN_DATA` 可指定程序与更新目录，默认路径为 macOS。
 - 导出冻结当前活动标签展示，不携带交互；不可读取的 Canvas 与未内联的远程资源不保证离线导出。

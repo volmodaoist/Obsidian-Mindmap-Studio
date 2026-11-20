@@ -54,7 +54,8 @@
  * 各自守卫），而 `isVisible()` 在无头运行时不存在——高频路径不得依赖宿主面
  * 缺口（论证见 `repairUnsettled` 方法注释）。
  */
-import { hasPluginContents, syncPluginContents, disposePluginContents } from '../../platform/rendering/plugins/bridge';
+import { hasPluginContents, syncPluginContents, disposePluginContents, getEditingPluginNodeIds } from '../../platform/rendering/plugins/bridge';
+import { readNodeDataString } from '../../core/node-data';
 import { collectRenderNodeData, getRenderRoot } from '../../engine/mindmap';
 import type { MindMap, MindMapNode } from '../../core/engine-types';
 import { createWarnOnce } from '../../core/errors';
@@ -375,8 +376,17 @@ export class ContentRemeasureSession {
 		this.deferred = null;
 		this.deferredRetried = false;
 		if (nodes.length > 0) {
-			refreshNodesCustomContent(mindMap, nodes);
+			this.refreshContent(mindMap, nodes);
 		}
+	}
+
+	private refreshContent(mindMap: MindMap | null, nodes: readonly MindMapNode[]): void {
+		if (!mindMap) return;
+		const editing = getEditingPluginNodeIds(mindMap);
+		if (!editing.size) { refreshNodesCustomContent(mindMap, nodes); return; }
+		const keepExisting = new Set(nodes.filter(node => editing.has(readNodeDataString(node.getData?.(), 'uid'))));
+		if (keepExisting.size) refreshNodesCustomContent(mindMap, nodes, keepExisting);
+		else refreshNodesCustomContent(mindMap, nodes);
 	}
 
 	/** 隐藏态不测量（不变式 ④）：本批 holders 原样挂起，等可见后由 syncVisibility 重新入批 */
@@ -477,7 +487,7 @@ export class ContentRemeasureSession {
 		this.repairUnsettled();
 		const nodes = Array.from(this.settledNodes);
 		if (nodes.length > 0) {
-			refreshNodesCustomContent(this.host.getMindMap(), nodes);
+			this.refreshContent(this.host.getMindMap(), nodes);
 		}
 	}
 
